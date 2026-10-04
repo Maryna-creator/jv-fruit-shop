@@ -1,7 +1,7 @@
 package core.basesyntax.service;
 
-import java.util.Map;
+import core.basesyntax.db.Storage;
 
 public interface ReportGenerator {
-    String getReport(Map<String,Integer> report);
+    String getReport(Storage report);
 }

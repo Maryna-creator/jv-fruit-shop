@@ -1,21 +1,22 @@
 package core.basesyntax;
 
+import core.basesyntax.db.Storage;
 import core.basesyntax.model.FruitTransaction;
 import core.basesyntax.model.Operation;
 import core.basesyntax.service.DataConverter;
 import core.basesyntax.service.FileReader;
 import core.basesyntax.service.FileWriter;
+import core.basesyntax.service.OperationHandler;
+import core.basesyntax.service.OperationStrategy;
 import core.basesyntax.service.ReportGenerator;
 import core.basesyntax.service.ShopService;
 import core.basesyntax.service.impl.DataConverterImpl;
 import core.basesyntax.service.impl.FileReaderImpl;
 import core.basesyntax.service.impl.FileWriterImpl;
+import core.basesyntax.service.impl.OperationStrategyImpl;
 import core.basesyntax.service.impl.ReportGeneratorImpl;
 import core.basesyntax.service.impl.ShopServiceImpl;
 import core.basesyntax.strategy.BalanceOperation;
-import core.basesyntax.strategy.OperationHandler;
-import core.basesyntax.strategy.OperationStrategy;
-import core.basesyntax.strategy.OperationStrategyImpl;
 import core.basesyntax.strategy.PurchaseOperation;
 import core.basesyntax.strategy.ReturnOperation;
 import core.basesyntax.strategy.SupplyOperation;
@@ -24,9 +25,12 @@ import java.util.List;
 import java.util.Map;
 
 public class Main {
+    private static final String INPUT_FILE = "src/main/resources/reportToRead.csv";
+    private static final String OUTPUT_FILE = "src/main/resources/finalReport.csv";
+
     public static void main(String[] arg) {
         FileReader fileReader = new FileReaderImpl();
-        List<String> inputReport = fileReader.read("reportToRead.csv");
+        List<String> inputReport = fileReader.read(INPUT_FILE);
 
         DataConverter dataConverter = new DataConverterImpl();
         final List<FruitTransaction> transactions = dataConverter.convert(inputReport);
@@ -38,7 +42,7 @@ public class Main {
         operationHandlers.put(Operation.SUPPLY, new SupplyOperation());
         OperationStrategy operationStrategy = new OperationStrategyImpl(operationHandlers);
 
-        Map<String, Integer> storage = new HashMap<>();
+        Storage storage = new Storage();
         ShopService shopService = new ShopServiceImpl(operationStrategy, storage);
         shopService.process(transactions);
 
@@ -46,6 +50,6 @@ public class Main {
         String resultingReport = reportGenerator.getReport(storage);
 
         FileWriter fileWriter = new FileWriterImpl();
-        fileWriter.write(resultingReport, "finalReport.csv");
+        fileWriter.write(resultingReport, OUTPUT_FILE);
     }
 }
